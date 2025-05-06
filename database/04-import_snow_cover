@@ -1,0 +1,85 @@
+
+-- Create the snow cover table 
+-- It's always good to add any many constraints as possible
+CREATE TABLE Snow_cover (
+    Site VARCHAR NOT NULL, 
+    Year INTEGER NOT NULL CHECK (Year BETWEEN 1990 AND 2018),
+    Date DATE NOT NULL, 
+    Plot VARCHAR NOT NULL, 
+    Location VARCHAR NOT NULL, 
+    Snow_cover REAL CHECK (Snow_cover BETWEEN 0 AND 130), 
+    Water_cover REAL CHECK (Water_cover BETWEEN 0 AND 130), 
+    Land_cover REAL CHECK (Land_cover BETWEEN 0 AND 130), 
+    Total_cover REAL CHECK (Total_cover BETWEEN 0 AND 130),
+    Observer VARCHAR, 
+    Notes VARCHAR, 
+    PRIMARY KEY (Site, Date, Plot, Location), 
+    FOREIGN KEY (Site) REFERENCES Site (Code)
+);
+
+-- We have the table ready, and now we want to add all of our data 
+-- We can copy a csv file with the same headers from a specified path 
+-- Here, we are "ingesting" our data!
+COPY Snow_cover FROM "../ASDN_csv/snow_survey_fixed.csv" (header TRUE, nullstr "NA");
+
+-- Check the table 
+SELECT * FROM Snow_cover LIMIT 10;
+
+-- No data is defined as NULL in SQL
+-- We need to convert all NAs to NULLs (see above: nullstr "NA") 
+
+
+
+-- Now that we have our data, lets do some analysis 
+
+-- Ask 1: What is the average snow cover at each site?
+SELECT Site, AVG(Snow_cover) AS Avg_snow_cover
+    FROM Snow_cover
+    GROUP BY Site;
+
+
+-- Ask 2: Order the result to get the top 5 snowy sites?
+SELECT Site, AVG(Snow_cover) AS Avg_snow_cover
+    FROM Snow_cover
+    GROUP BY Site
+    ORDER BY Avg_snow_cover DESC
+    LIMIT 5;
+
+-- Ask 3: save this as a view
+CREATE VIEW Site_avg_snowcover AS (
+    SELECT Site, AVG(Snow_cover) AS Avg_snow_cover
+    FROM Snow_cover
+    GROUP BY Site
+    ORDER BY Avg_snow_cover DESC
+    LIMIT 5
+);
+SELECT * FROM Site_avg_snowcover;
+
+-- Make this a temp table
+CREATE TEMP TABLE Site_avg_snowcover_table AS (
+    SELECT Site, AVG(Snow_cover) AS Avg_snow_cover
+    FROM Snow_cover
+    GROUP BY Site
+    ORDER BY Avg_snow_cover DESC
+    LIMIT 5
+);
+SELECT * FROM Site_avg_snowcover_table;
+
+
+
+-- DANGER ZONE AKA updating data
+-- We found that 0s at Plot = 'brw0' with snow_cover == 0 are actually no data (NULL)
+-- To be safe, we'll create a temporary backup table to update
+-- Lets try first on a backup
+CREATE TEMP TABLE Snow_cover_backup AS (
+    SELECT * FROM Snow_cover
+);
+
+UPDATE Snow_cover_backup SET Snow_cover = NULL 
+    WHERE Plot = 'brw0' AND Snow_cover = 0;
+
+-- Update the original table 
+UPDATE Snow_cover SET Snow_cover = NULL 
+    WHERE Plot = 'brw0' AND Snow_cover = 0;
+
+
