@@ -1,0 +1,6 @@
+outer_join, .026000
+subquery, .026000
+except, .028000
+subquery_100, .020000
+outer_join_100, .020000
+except_100, .030000

@@ -18,17 +18,17 @@ SELECT Scientific_name, Nest_count FROM
    ORDER BY Species
    LIMIT 2) JOIN Species ON Species = Code;
    -- outer joins
-   CREATE TEMP TABLE a (cola INTEGER, common INTEGER);
-   INSERT INTO a VALUES (1, 1), (2, 2), (3, 3);
+CREATE TEMP TABLE a (cola INTEGER, common INTEGER);
+INSERT INTO a VALUES (1, 1), (2, 2), (3, 3);
    SELECT * FROM a;
-   CREATE TEMP TABLE b (common INTEGER, colb INTEGER);
+CREATE TEMP TABLE b (common INTEGER, colb INTEGER);
    INSERT INTO b VALUES (2, 2), (3, 3), (4, 4), (5, 5);
    SELECT * FROM b;
    -- inner join
    SELECT * FROM a JOIN B USING (common);
    SELECT * FROM a INNER JOIN b USING (common);
    -- left or right outer join
-   SELECT * FROM a LEFT JOIN b USING (common);
+SELECT * FROM a LEFT JOIN b USING (common);
    .nullvalue -NULL-
    .nullvalue ''
    SELECT * FROM a RIGHT JOIN b USING (common);
